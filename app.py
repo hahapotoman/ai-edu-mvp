@@ -70,11 +70,22 @@ if st.session_state.get("quiz_data"):
     if st.button("✅ 정답 확인 및 피드백"):
         score = 0
         total_mcq = sum(1 for q in data["quiz"] if q["options"])
+        
+        st.subheader("📊 채점 결과")
         for i, q in enumerate(data["quiz"]):
-            user_ans = st.session_state.user_answers.get(f"q_{i}")
-            if q["options"]:
+            # Streamlit의 key 기능을 활용해 저장된 값을 직접 가져옵니다.
+            user_ans = st.session_state.get(f"q_{i}") 
+            
+            if q["options"]: # 객관식 채점
                 correct_opt = q["options"][q["correct"]]
                 if user_ans == correct_opt:
                     score += 1
-        st.success(f"🎉 객관식 정답 수: {score}/{total_mcq}")
-        st.info(f"💡 학습 팁: {data.get('tips', '추가 복습이 필요합니다.')}")
+                    st.success(f"Q{i+1}. 정답입니다! (선택: {user_ans})")
+                else:
+                    st.error(f"Q{i+1}. 오답입니다. (내 답: {user_ans} / 정답: {correct_opt})")
+            else: # 주관식 피드백
+                st.info(f"Q{i+1}. 주관식 작성 완료 (내 답: {user_ans})")
+
+        st.divider()
+        st.success(f"🎉 객관식 최종 점수: {score} / {total_mcq}")
+        st.warning(f"💡 AI 학습 팁: {data.get('tips', '추가 복습이 필요합니다.')}")
